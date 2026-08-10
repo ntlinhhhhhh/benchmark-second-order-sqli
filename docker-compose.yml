@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: phuzz-db
+    command: >
+      --general-log=0
+      --general-log-file=/var/log/mysql/general.log
+      --log-raw
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      UMASK: "0666"
+    ports:
+      - "3306:3306"
+    tmpfs:
+      - /var/lib/mysql
+    volumes:
+      - ./mysql-log:/var/log/mysql
+      - ./db/install_schema.sql:/docker-entrypoint-initdb.d/install_schema.sql
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1 FROM ${MYSQL_DATABASE}.clients LIMIT 1;' > /dev/null 2>&1 || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  web:
+    build: .
+    container_name: phuzz-php
+    entrypoint: ["bash", "-c", "mkdir -p /shared-tmpfs/{coverage-reports,exception-reports,error-reports,mysql-error-reports,mysql-query-events,shell-error-reports,unserialize-error-reports,pathtraversal-error-reports,xxe-error-reports} && find /var/www/html > /shared-tmpfs/web-paths.txt && chmod -R 777 /shared-tmpfs && exec docker-php-entrypoint php-fpm"]
+    environment:
+      FUZZER_COMPRESS: 1
+      FUZZER_COVERAGE_PATH: /var/www/html/
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - ./src:/var/www/html
+      - ./mysql-log:/var/log/mysql
+      - shared-tmpfs:/shared-tmpfs
+      - ${INSTRUMENTATION_PATH}:/var/www/fuzzer:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+
+  nginx:
+    image: nginx:alpine
+    container_name: phuzz-nginx
+    ports:
+      - "8888:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      # Nginx phải đợi Web sẵn sàng để tránh lỗi 502 Bad Gateway ban đầu
+      web:
+        condition: service_started
+    restart: always
+
+volumes:
+  mysql-data:
+  shared-tmpfs:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=1024m,uid=1000"
