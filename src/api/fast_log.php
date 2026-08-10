@@ -7,6 +7,10 @@ $db_host = getenv('DB_HOST') ?: 'db';
 $db_user = getenv('DB_USER') ?: 'root';
 $db_pass = getenv('DB_PASS') ?: 'rootpassword';
 $db_name = getenv('DB_NAME') ?: 'db';
+$db_host = getenv('DB_HOST') ?: 'db';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: 'rootpassword';
+$db_name = getenv('DB_NAME') ?: 'db';
 
 $db = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
