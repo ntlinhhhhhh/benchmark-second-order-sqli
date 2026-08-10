@@ -5,20 +5,24 @@ services:
     image: mysql:8.0
     container_name: phuzz-db
     command: >
-      --general-log=0
+      --general-log=1
       --general-log-file=/var/log/mysql/general.log
       --log-raw
+      --skip-name-resolve
+      --innodb-doublewrite=0
+      --innodb-flush-log-at-trx-commit=0
+      --sync-binlog=0
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       UMASK: "0666"
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
     ports:
       - "3306:3306"
-    tmpfs:
-      - /var/lib/mysql
     volumes:
+      - mysql-data:/var/lib/mysql
       - ./mysql-log:/var/log/mysql
       - ./db/install_schema.sql:/docker-entrypoint-initdb.d/install_schema.sql
     restart: always
@@ -65,6 +69,226 @@ services:
         condition: service_started
     restart: always
 
+  fuzzer-testbed1-source:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed1-source
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 1
+      FUZZER_CONFIG: testbed/hargen_testbed1_source
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed1:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed1-sink:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed1-sink
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 2
+      FUZZER_CONFIG: testbed/hargen_testbed1_sink
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed1:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed2-1-source:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed2-1-source
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 3
+      FUZZER_CONFIG: testbed/hargen_testbed2_1_source
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed2-1:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed2-1-sink:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed2-1-sink
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 4
+      FUZZER_CONFIG: testbed/hargen_testbed2_1_sink
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed2-1:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed2-2:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed2-2
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 5
+      FUZZER_CONFIG: testbed/hargen_testbed2_2
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed2-2:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed3-source:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed3-source
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 6
+      FUZZER_CONFIG: testbed/hargen_testbed3_source
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed3:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed3-sink:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed3-sink
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 7
+      FUZZER_CONFIG: testbed/hargen_testbed3_sink
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed3:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed4-source:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed4-source
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 8
+      FUZZER_CONFIG: testbed/hargen_testbed4_source
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed4:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed4-worker:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed4-worker
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 9
+      FUZZER_CONFIG: testbed/hargen_testbed4_worker
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed4:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
+  fuzzer-testbed4-status:
+    build:
+      context: ../../phuzz/silent-phuzz/code/fuzzer
+      dockerfile: Dockerfile
+    container_name: fuzzer-testbed4-status
+    environment:
+      PYTHONUNBUFFERED: 1
+      FUZZER_NODE_ID: 10
+      FUZZER_CONFIG: testbed/hargen_testbed4_status
+      FUZZER_CLEANUP: 1
+      FUZZER_COMPRESS: 1
+    volumes:
+      - ../../phuzz/silent-phuzz/code/fuzzer:/app
+      - shared-tmpfs:/shared-tmpfs
+      - sync-tmpfs-testbed4:/sync-tmpfs
+    depends_on:
+      db:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+    restart: always
+
 volumes:
   mysql-data:
   shared-tmpfs:
@@ -73,3 +297,38 @@ volumes:
       type: "tmpfs"
       device: "tmpfs"
       o: "size=1024m,uid=1000"
+
+  sync-tmpfs-testbed1:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=256m,uid=1000"
+
+  sync-tmpfs-testbed2-1:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=256m,uid=1000"
+
+  sync-tmpfs-testbed2-2:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=256m,uid=1000"
+
+  sync-tmpfs-testbed3:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=256m,uid=1000"
+
+  sync-tmpfs-testbed4:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "size=256m,uid=1000"
