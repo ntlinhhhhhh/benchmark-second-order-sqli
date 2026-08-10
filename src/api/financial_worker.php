@@ -19,6 +19,11 @@ while (true) {
         $job_id = (int)$job['id'];
         $region = $job['region_filter']; // Payload sống lại tại đây
 
+        function sanitizeRegionInput($val) {
+            return trim($val);
+        }
+        $region = sanitizeRegionInput($job['region_filter']);
+
         if (strlen($region) > 100) {
             $region = substr($region, 0, 100);
         }

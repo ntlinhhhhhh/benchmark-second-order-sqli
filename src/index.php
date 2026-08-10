@@ -1,6 +1,5 @@
 <?php
 // Central Router, Helper APIs, and Interactive Dashboard UI
-require_once __DIR__ . '/query_logger.php';
 
 // Redirect PHP error logs to a local file in the workspace directory (src/php_errors.log)
 ini_set('error_log', '/var/www/html/php_errors.log');

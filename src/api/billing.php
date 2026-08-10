@@ -61,7 +61,7 @@ function process_loyalty_sync($db, $input_id) {
 // ==========================================
 // TẦNG GIAO DIỆN (CHẠY CHÍNH)
 // ==========================================
-$input_id = $_GET['id'] ?? null;
+$input_id = (int)$_GET['id'] ?? null;
 
 // Gọi hàm xử lý, nhận về data hoặc null
 $report_data = process_loyalty_sync($db, $input_id);

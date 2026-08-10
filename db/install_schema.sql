@@ -109,7 +109,8 @@ CREATE TABLE IF NOT EXISTS heavy_report_jobs (
     region_filter VARCHAR(255) NOT NULL,
     status        VARCHAR(20) DEFAULT 'PENDING',
     report_url    VARCHAR(255) DEFAULT NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS tax_brackets (
