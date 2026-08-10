@@ -1,0 +1,5 @@
+doc/
+mysql-log/
+/downloads
+src/php_errors.log
+.env
