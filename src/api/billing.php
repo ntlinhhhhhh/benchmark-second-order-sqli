@@ -16,15 +16,12 @@ function validate_safe_id($id) {
 
 function process_loyalty_sync($db, $input_id) {
     // 1. LÍNH GÁC 1: Chặn ID sai
-    if (!validate_safe_id($input_id)) {
-        error_log("Invalid ID attempt: " . $input_id);
-        return null;
-    }
+    $clean_id = validate_safe_id($input_id) ? (int)$input_id : 0;
 
     // 2. LÍNH GÁC 2: Chặn User không tồn tại
-    $result = $db->query("SELECT client_name, is_synced FROM clients WHERE id = $input_id");
+    $result = $db->query("SELECT client_name, is_synced FROM clients WHERE id = $clean_id");
     if ($result->num_rows === 0) {
-        error_log("Client ID $input_id not found.");
+        error_log("Client ID $clean_id not found.");
         return null; // Thoát hàm ngay
     }
 
@@ -36,9 +33,9 @@ function process_loyalty_sync($db, $input_id) {
     try {
         if ($is_synced === 0) {
             $msg = "Enrolled new loyal customer: " . $cname;
-            $sql = "UPDATE clients SET is_synced = 1 WHERE id = $input_id; \n
-                    INSERT INTO loyalty_points (client_id, current_tier, total_spent) VALUES ($input_id, 'BRONZE', 0); \n
-                    INSERT INTO system_logs (client_id, event_type, message) VALUES ($input_id, 'NEW_MEMBER_ACTIVATION', '$msg')";
+            $sql = "UPDATE clients SET is_synced = 1 WHERE id = $clean_id; \n
+                    INSERT INTO loyalty_points (client_id, current_tier, total_spent) VALUES ($clean_id, 'BRONZE', 0); \n
+                    INSERT INTO system_logs (client_id, event_type, message) VALUES ($clean_id, 'NEW_MEMBER_ACTIVATION', '$msg')";
 
             $db->multi_query($sql);
             
@@ -53,7 +50,7 @@ function process_loyalty_sync($db, $input_id) {
             ];
         }
     } catch (Exception $e) {
-        error_log("Failed to process client ID $input_id: " . $e->getMessage());
+        error_log("Failed to process client ID $clean_id: " . $e->getMessage());
         return null; // Nuốt lỗi Fuzzer (SQLi)
     }
 }
@@ -61,7 +58,7 @@ function process_loyalty_sync($db, $input_id) {
 // ==========================================
 // TẦNG GIAO DIỆN (CHẠY CHÍNH)
 // ==========================================
-$input_id = $_GET['id'] ?? null;
+$input_id = (int)$_GET['id'] ?? null;
 
 // Gọi hàm xử lý, nhận về data hoặc null
 $report_data = process_loyalty_sync($db, $input_id);

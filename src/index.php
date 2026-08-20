@@ -1,6 +1,5 @@
 <?php
 // Central Router, Helper APIs, and Interactive Dashboard UI
-require_once __DIR__ . '/query_logger.php';
 
 // Redirect PHP error logs to a local file in the workspace directory (src/php_errors.log)
 ini_set('error_log', '/var/www/html/php_errors.log');
@@ -31,11 +30,11 @@ $request_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 // Testbed 1: The Explicit Silent Mode
 // Source: POST /api/track -> raw_traffic (Prepared Stmt)
 // Sink  : GET  /cron/aggregate_stats -> agent_stats (ERRMODE_SILENT)
-if ($request_path === '/api/track') {
+if ($request_path === '/api/track' || $request_path === '/api/track.php') {
     require_once __DIR__ . '/api/track.php';
     exit;
 }
-if ($request_path === '/cron/aggregate_stats') {
+if ($request_path === '/cron/aggregate_stats' || $request === '/cron/aggregate_stats.php') {
     require_once __DIR__ . '/api/aggregate_stats.php';
     exit;
 }
@@ -43,18 +42,18 @@ if ($request_path === '/cron/aggregate_stats') {
 // Testbed 2.1: The Batching Blackhole (multi_query)
 // Source: POST /register -> clients (Prepared Stmt)
 // Sink  : GET  /billing -> loyalty_points / system_logs (multi_query)
-if ($request_path === '/register') {
+if ($request_path === '/register' || $request_path === '/register.php') {
     require_once __DIR__ . '/api/register.php';
     exit;
 }
-if ($request_path === '/billing') {
+if ($request_path === '/billing' || $request_path === '/billing.php') {
     require_once __DIR__ . '/api/billing.php';
     exit;
 }
 
 // Testbed 2.2: The Asynchronous Socket Blackhole (MYSQLI_ASYNC)
 // Combined: POST /api/fast_log -> metric_logs (MYSQLI_ASYNC without reap)
-if ($request_path === '/api/fast_log') {
+if ($request_path === '/api/fast_log' || $request_path === '/api/fast_log.php') {
     require_once __DIR__ . '/api/fast_log.php';
     exit;
 }
@@ -64,11 +63,11 @@ if ($request_path === '/api/fast_log') {
 // Testbed 3: The Serialization Taint-Loss
 // Source: POST /admin/save_theme -> site_options (json_encode)
 // Sink  : GET  /public/index.php -> render_logs (json_decode + SQLi)
-if ($request_path === '/admin/save_theme') {
+if ($request_path === '/admin/save_theme' || $request_path === '/admin/save_theme.php') {
     require_once __DIR__ . '/api/save_theme.php';
     exit;
 }
-if ($request_path === '/public/index.php') {
+if ($request_path === '/public/index' || $request_path === '/public/index.php') {
     require_once __DIR__ . '/api/index.php';
     exit;
 }
@@ -89,6 +88,11 @@ if ($request_path === '/daemon/financial_worker' || $request_path === '/api/fina
 }
 if ($request_path === '/api/check_status' || $request_path === '/api/check_status.php') {
     require_once __DIR__ . '/api/check_status.php';
+    exit;
+}
+
+if ($request_path === '/api/vulnerable_test' || $request_path === '/api/vulnerable_test.php') {
+    require_once __DIR__ . '/api/vulnerable_test.php';
     exit;
 }
 ?>

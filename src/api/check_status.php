@@ -13,7 +13,12 @@ $db = new mysqli($db_host, $db_user, $db_pass, $db_name);
 $job_id = (int)$_GET['job_id'];
 
 $res = $db->query("SELECT status, report_url FROM heavy_report_jobs WHERE id = $job_id");
-$job = $res->fetch_assoc();
+$job = $res ? $res->fetch_assoc() : null;
+
+if (!$job) {
+    echo json_encode(["status" => "error", "message" => "Job not found."]);
+    exit;
+}
 
 if ($job['status'] === 'DONE') {
     // Trả về link tải báo cáo (Đã được Worker sinh ra với tên file ngẫu nhiên)
