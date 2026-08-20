@@ -1,5 +1,5 @@
 doc/
 mysql-log/
-/downloads
+downloads/
 src/php_errors.log
 .env
