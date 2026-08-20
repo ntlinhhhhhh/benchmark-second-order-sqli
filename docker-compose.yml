@@ -8,17 +8,23 @@ services:
       --general-log=1
       --general-log-file=/var/log/mysql/general.log
       --log-raw
+      --skip-name-resolve
+      --innodb-doublewrite=0
+      --innodb-flush-log-at-trx-commit=0
+      --sync-binlog=0
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       UMASK: "0666"
+      MYSQL_INITDB_SKIP_TZINFO: "yes"
     ports:
       - "3307:3307"
     tmpfs:
       - /var/lib/mysql
     volumes:
+      - mysql-data:/var/lib/mysql
       - ./mysql-log:/var/log/mysql
       - ./db/install_schema.sql:/docker-entrypoint-initdb.d/install_schema.sql
     restart: always
@@ -64,12 +70,3 @@ services:
       web:
         condition: service_started
     restart: always
-
-volumes:
-  mysql-data:
-  shared-tmpfs:
-    driver: local
-    driver_opts:
-      type: "tmpfs"
-      device: "tmpfs"
-      o: "size=1024m,uid=1000"
