@@ -109,7 +109,8 @@ CREATE TABLE IF NOT EXISTS heavy_report_jobs (
     region_filter VARCHAR(255) NOT NULL,
     status        VARCHAR(20) DEFAULT 'PENDING',
     report_url    VARCHAR(255) DEFAULT NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS tax_brackets (
@@ -152,27 +153,27 @@ INSERT IGNORE INTO sales_transactions (emp_id, transaction_amount) VALUES
 -- =========================================================================
 -- TABLES FOR PHUZZ (KEEP UNCHANGED)
 -- =========================================================================
--- CREATE TABLE IF NOT EXISTS __phuzz_insert (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     marker VARCHAR(100) DEFAULT 'marker'
--- ) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS __phuzz_insert (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    marker VARCHAR(100) DEFAULT 'marker'
+) ENGINE=InnoDB;
 
--- CREATE TABLE IF NOT EXISTS __phuzz_update (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     marker VARCHAR(100) DEFAULT 'marker'
--- ) ENGINE=InnoDB;
--- INSERT IGNORE INTO __phuzz_update (id, marker) VALUES (1, 'marker');
+CREATE TABLE IF NOT EXISTS __phuzz_update (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    marker VARCHAR(100) DEFAULT 'marker'
+) ENGINE=InnoDB;
+INSERT IGNORE INTO __phuzz_update (id, marker) VALUES (1, 'marker');
 
--- CREATE TABLE IF NOT EXISTS __phuzz_delete (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     marker VARCHAR(100) DEFAULT 'marker'
--- ) ENGINE=InnoDB;
--- INSERT IGNORE INTO __phuzz_delete (id, marker) VALUES (1, 'marker');
+CREATE TABLE IF NOT EXISTS __phuzz_delete (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    marker VARCHAR(100) DEFAULT 'marker'
+) ENGINE=InnoDB;
+INSERT IGNORE INTO __phuzz_delete (id, marker) VALUES (1, 'marker');
 
--- CREATE TABLE IF NOT EXISTS __phuzz_history (                                                                                                                           
---         pz_trace_id VARCHAR(100) NOT NULL PRIMARY KEY,                                                                                                                
---         url TEXT NOT NULL,                                                                                                                                              
---         method VARCHAR(10) NOT NULL,           
---         request_data TEXT,                                                                                                                         
---         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP                                                                                                                  
--- ) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS __phuzz_history (                                                                                                                           
+        pz_trace_id VARCHAR(100) NOT NULL PRIMARY KEY,                                                                                                                
+        url TEXT NOT NULL,                                                                                                                                              
+        method VARCHAR(10) NOT NULL,           
+        request_data TEXT,                                                                                                                         
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP                                                                                                                  
+) ENGINE=InnoDB;
